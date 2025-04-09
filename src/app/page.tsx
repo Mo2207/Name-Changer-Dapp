@@ -1,103 +1,177 @@
-import Image from "next/image";
+
+"use client" // needed to interact with window
+
+import { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  // address of the deployed "name-changer.sol" smart contract
+  const CONTRACT_ADDRESS = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+
+  // contract ABI (application binary interface)
+  // tells the frontend how to interact with the smart contract
+  const CONTRACT_ABI = [
+    {
+      "inputs": [],
+      "name": "getAllNames",
+      "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      inputs: [{ internalType: 'string', name: '_name', type: 'string' }],
+      name: 'addName',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    } 
+  ];
+
+  // STATE VARIABLES
+  const [walletAddress, setWalletAddress] = useState<string | null>(null); // needed to store the users wallet address
+  const [name, setName] = useState<string>("None"); // needed to store the name from the smart contract
+  const [newName, setNewName] = useState(''); // needed to store the new name from the input field
+  
+
+  // ASK USER PERMISSION TO CONNECT THEIR WALLET
+  const connectWallet = async () => {
+    // get the metamask provider
+    const metaMaskProvider = (window as any).ethereum;
+    if (!metaMaskProvider) return alert("Please install MetaMask!");
+
+    // if metamask is installed, grab the users wallet address
+    const [address] = await metaMaskProvider.request({ method: 'eth_requestAccounts' }); // https://tinyurl.com/52stu9pw
+    setWalletAddress(address); // store the address in state
+  }
+
+  // GET NAME ON SMART CONTRACT
+  const getNamesOnContract = async () => { 
+    // get the metamask provider
+    const metaMaskProvider = (window as any).ethereum;
+    if (!metaMaskProvider) return alert("Please install MetaMask!");
+
+    // create READ-ONLY connection using metamask extension
+    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
+
+    // create a javascript representation of the smart contract
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider); // https://tinyurl.com/yc7erycv
+
+    // call the getAllNames function from the smart contract and return result
+    return await contract.getAllNames(); // getAllNames() is a function from the smart contract
+  }
+
+  // SET NAME ON CONTRACT
+  const addNameOnContract = async () => {
+    // get the metamask provider
+    const metaMaskProvider = (window as any).ethereum;
+    if (!metaMaskProvider) return alert("Please install MetaMask!");
+
+    // create a READ & WRITE connection using metamask extension
+    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
+
+    // because SetNameOnContract is a state changing function, we need to sign the transaction
+    // create a signer to sign transactions
+    const signer = await provider.getSigner(); // https://tinyurl.com/ynfffak8 getSigner() is a method of BrowserProvider
+
+    // create a javascript representation of the smart contract
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); // https://tinyurl.com/yc7erycv
+
+    //  attempt to change the name on the smart contract
+    try {
+      const tx = await contract.addName(newName); // addName() is a function from the smart contract
+      
+      // wait for the transaction to be mined
+      await tx.wait();
+      console.log("Name updated:", newName); // log the new name
+
+      setNewName(''); // clear the input field
+      getNamesOnContract(); // get the names from the contract 
+    } catch (error) {
+      console.error("Transaction failed:", error); // log the error
+      alert("Failed to update name."); // alert the user
+    }
+  }
+
+  // GET NAME ONCE WALLET IS CONNECTED
+  useEffect(() => {
+    if (walletAddress) {
+      getNamesOnContract();
+    }
+  }, [walletAddress]);
+
+  return (
+    <section className="flex flex-col justify-center items-center h-screen bg-gray-100">
+
+      {/* title */}
+      <div className='flex flex-col items-center'>
+        <h1 className="text-3xl font-bold mb-4 text-gray-900">Name Changer Dapp</h1>
+      </div>
+
+      {/* description */}
+      <div className='flex flex-col items-center w-[50%] text-center'>
+        <p className="text-lg mb-4 text-gray-600">This is a simple ethereum blockchain based Dapp, make sure MetaMask extension is installed and connect your wallet to get started!</p>
+      </div>
+
+      {!walletAddress ? (
+        <button
+          onClick={connectWallet}
+          className="bg-[#224ead] text-white px-4 py-2 rounded"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Connect MetaMask
+        </button>
+      ) : (
+        <>
+          <div className="flex flex-col text-center mt-4">
+            <p className="text-lg mb-4 text-gray-600">Your Wallet Address: {walletAddress}</p>
+          </div>
+
+          {/*  */}
+          <div className='flex flex-col'>
+            <div className='text-center'>
+              <h2 className='mb-4 text-2xl text-gray-900'>NameDapp Contract Functions:</h2>
+            </div>
+            {/* get names button */}
+            <button
+              onClick={getNamesOnContract}
+              disabled={!newName}
+              className="bg-[#224ead] text-white px-4 py-2 rounded mb-3"
+            >
+              Get All Names
+            </button>
+
+            {/* add name button */}
+            <button
+              onClick={addNameOnContract}
+              disabled={!newName}
+              className="bg-[#C97538] text-white px-4 py-2 rounded"
+            >
+              Add Name
+            </button>
+          </div>
+          
+
+          
+        </>
+      )}
+
+      {/* setName() input field & button */}
+      {/* <div className="mt-4">
+        <input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Enter new name"
+          className="border px-2 py-1 rounded mr-2 text-gray-600"
+        />
+        <button
+          onClick={setNameOnContract}
+          disabled={!newName}
+          className="bg-[#224ead] text-white px-4 py-1 rounded"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          Set Name
+        </button>
+      </div> */}
+
+    </section>
   );
 }
