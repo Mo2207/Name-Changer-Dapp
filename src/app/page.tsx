@@ -9,7 +9,7 @@ import metamaskFox from '../../public/img/metamask-fox.png'; // import metamask 
 export default function Home() {
 
   // address of the deployed "NameDapp.sol" smart contract
-  const CONTRACT_ADDRESS = "0x8BA28EdA2878A861a9523699947773BD594280a2";
+  const CONTRACT_ADDRESS = "0x8bACb12b875aeb285ff76fa06f6F045F57ab8a88";
 
   // contract ABI (application binary interface)
   // tells the frontend how to interact with the smart contract
@@ -18,6 +18,13 @@ export default function Home() {
       "inputs": [],
       "name": "getAllNames",
       "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_index", "type": "uint256" }],
+      "name": "getName",
+      "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -39,12 +46,21 @@ export default function Home() {
 
   // STATE VARIABLES
   const [walletAddress, setWalletAddress] = useState<string | null>(null); // needed to store the users wallet address
-  const [names, setNames] = useState<string[]>([]); // needed to store the names from the smart contract
+  const [names, setNames] = useState<string[]>([]); // needed to store the names for getAllNames() function
+  const [name, setName] = useState<string>(''); // needed to store the name for getName() function
   const [newName, setNewName] = useState(''); // needed to store the new name from the input field
-  const [index, setIndex] = useState<string>(''); // needed to store the index of the name to be removed
+
+  // INDEX STATES
+  const [removeNameIndex, setRemoveNameIndex] = useState<string>(''); // needed to store the index of the name to be removed
+  const [getNameIndex, setGetNameIndex] = useState<string>(''); // needed to store the index of the name to be retrieved
+
+  // VISIBILITY STATES
   const [getNamesVisible, setGetNamesVisible] = useState(false); // needed to show/hide getAllNames() function output
+  const [getNameVisible, setGetNameVisible] = useState(false); // needed to show/hide getName() function output
   const [addNamesVisible, setAddNamesVisible] = useState(false); // needed to show/hide addName() function output
   const [removeNamesVisible, setRemoveNamesVisible] = useState(false); // needed to show/hide removeName() function output
+
+  // LOADING STATES
   const [addLoading, setAddLoading] = useState(false); // needed to show loading state for addName()
   const [removeLoading, setRemoveLoading] = useState(false); // needed to show loading state removeName()
   
@@ -83,7 +99,30 @@ export default function Home() {
     }
   }
 
-  // ADD NAME ON CONTRACT
+  // GET NAME FROM SMART CONTRACT
+  const getNameOnContract = async () => { 
+    // get the metamask provider
+    const metaMaskProvider = (window as any).ethereum;
+    if (!metaMaskProvider) return alert("Please install MetaMask!");
+
+    // create READ-ONLY connection using metamask extension
+    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
+
+    // create a javascript representation of the smart contract
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider); // https://tinyurl.com/yc7erycv
+
+    // call the getName function from the smart contract and return result
+    try {
+      const name = await contract.getName(getNameIndex); // getName() is a function from the smart contract
+      setName(name); // set the names in state
+      console.log("Name on contract:", name); // log the names
+    } catch (error) {
+      console.error("Failed to get name:", error); // log the error
+      alert("Failed to get name."); // alert the user  
+    }
+  }
+
+  // ADD NAME TO SMART CONTRACT
   const addNameOnContract = async () => {
     // get the metamask provider
     const metaMaskProvider = (window as any).ethereum;
@@ -127,7 +166,7 @@ export default function Home() {
     }
   }
 
-  // REMOVE NAME FROM CONTRACT
+  // REMOVE NAME FROM SMART CONTRACT
   const removeNameOnContract = async () => {
     // get the metamask provider
     const metaMaskProvider = (window as any).ethereum;
@@ -148,12 +187,12 @@ export default function Home() {
       // start loading
       setRemoveLoading(true);
 
-      const tx = await contract.removeName(index); // removeName() is a function from the smart contract
+      const tx = await contract.removeName(removeNameIndex); // removeName() is a function from the smart contract
 
       // wait for the transaction to be mined
       await tx.wait();
 
-      setIndex(''); // clear the input field
+      setRemoveNameIndex(''); // clear the input field
 
       // Display success message temporarily
       setRemoveNamesVisible(true);
@@ -171,11 +210,11 @@ export default function Home() {
   }
 
   return (
-    <section className="flex flex-col justify-center items-center h-screen bg-gray-100">
+    <section className="flex flex-col items-center h-screen bg-gray-100 min-h-screen justify-center">
 
       {/* title */}
       <div className='flex flex-col items-center'>
-        <h1 className="text-4xl font-bold mb-6 text-gray-900">Name Changer Dapp</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">Name Changer Dapp</h1>
       </div>
 
       {!walletAddress ? (
@@ -205,7 +244,7 @@ export default function Home() {
         </>
       ) : (
         <>
-          <div className="flex flex-col text-center items-center mt-4 mb-8">
+          <div className="flex flex-col text-center items-center mt-4 mb-8 w-[75%]">
             <Image
               src={metamaskFox}
               alt="MetaMask Logo"
@@ -215,11 +254,11 @@ export default function Home() {
             />
             <h2 className='text-2xl font-semibold mb-4 text-[#f6851c]'>MetaMask successfully connected!</h2>
             <p className="text-xl mb-4 text-gray-600">Your Wallet Address is: <span className='font-semibold'>{walletAddress}</span></p>
-            <p className='text-lg text-gray-600 max-w-[600px] text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees because they manipulate data on the blockchain.</p>
-            <p className='text-lg text-gray-600 max-w-[600px] text-center'>
+            <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees because they manipulate data on the blockchain.</p>
+            <p className='text-lg text-gray-600 w-full text-center'>
               SepoliaETH is used for testing contracts to simulate using real-world dapps. To use any of the <span className='text-[#C97538] font-semibold'>orange</span> functions you'll need some. Head to{' '} 
               <a 
-                className='font-semibold hover:cursor-pointer' 
+                className='font-semibold hover:underline hover:cursor-pointer' 
                 href="https://www.alchemy.com/faucets/ethereum-sepolia"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -249,6 +288,34 @@ export default function Home() {
                 className={`text-gray-600 items-center text-xl ${getNamesVisible ? 'flex' : 'hidden'}`}
               >
                 {names.join(', ')}
+              </div>
+            </div>
+
+            {/* get name button */}
+            <div className='flex flex-row mb-3 w-full'>
+              <button
+                onClickCapture={() => {
+                  setGetNameVisible(true);
+                  getNameOnContract();
+                }}
+                className="bg-[#224ead] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#224eadde] transition duration-300 ease-in-out"
+              >
+                Get Name
+              </button>
+              <input 
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={getNameIndex}
+                  onChange={(e) => setGetNameIndex(e.target.value)}
+                  placeholder="Enter an Index"
+                  className="border px-2 py-1 rounded text-gray-600"
+                />
+
+              <div 
+                className={`text-gray-600 items-center text-xl pl-3 ${getNameVisible ? 'flex' : 'hidden'}`}
+              >
+                {name}
               </div>
             </div>
 
@@ -283,11 +350,11 @@ export default function Home() {
             </div>
 
             {/* remove name button */}
-            <div className='flex flex-row mb-3 w-full'>
+            <div className='flex flex-row w-full'>
               <div className='flex flex-row'>
                 <button
                   onClickCapture={() => {
-                    if (!index) return alert("Please enter an index!");
+                    if (!removeNameIndex) return alert("Please enter an index!");
                     removeNameOnContract();
                   }}
                   className="bg-[#C97538] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#c97438d7] transition duration-300 ease-in-out"
@@ -298,8 +365,8 @@ export default function Home() {
                   type="number"
                   min="0"
                   step="1"
-                  value={index}
-                  onChange={(e) => setIndex(e.target.value)}
+                  value={removeNameIndex}
+                  onChange={(e) => setRemoveNameIndex(e.target.value)}
                   placeholder="Enter an Index"
                   className="border px-2 py-1 rounded text-gray-600"
                 />
@@ -315,22 +382,22 @@ export default function Home() {
             </div>
 
           </div>
-          
+
+            <div className='flex flex-col items-center mt-8 text-gray-600'>
+              <p>View the deployed contract & transaction history on{' '}
+                <a
+                  className='font-semibold hover:underline hover:cursor-pointer'
+                  href="https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Sepolia Etherscan!
+                </a>
+              </p>
+            </div>
+
         </>
       )}
-
-      <div className='flex flex-col items-center mt-8 text-gray-600'>
-        <p>View the deployed contract & transaction history on{' '} 
-          <a
-            className='font-semibold hover:cursor-pointer'
-            href="https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Sepolia Etherscan!
-          </a>
-        </p>
-      </div>
 
     </section>
   );

@@ -6,13 +6,20 @@ contract NameDapp {
     string[] public names;
 
 
-    function addName(string memory _name) public {
-        names.push(_name);
-    }
-
-
     function getAllNames() public view returns (string[] memory) {
         return names;
+    }
+    
+    
+    function getName(uint _index) public view returns (string memory) {
+        require(_index < names.length, "Index out of bounds");
+
+        return names[_index];
+    }
+    
+
+    function addName(string memory _name) public {
+        names.push(_name);
     }
 
 
