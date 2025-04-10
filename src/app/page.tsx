@@ -193,10 +193,10 @@ export default function Home() {
   }
 
   return (
-    <section className="flex flex-col items-center h-screen bg-gray-100 min-h-screen justify-center">
+    <section className="flex flex-col items-center h-screen bg-gray-100 justify-center min-h-screen px-4 py-8 overflow-y-auto">
 
       {/* title */}
-      <div className='flex flex-col items-center mt-6'>
+      <div className='flex flex-col items-center mt-[10rem]'>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Name Changer Dapp</h1>
       </div>
 
@@ -220,6 +220,7 @@ export default function Home() {
           {/* metamask connection button */}
           <BlueButton
             onClick={connectWallet}
+            className='mr-0'
           >
             Connect to MetaMask
           </BlueButton>
@@ -237,7 +238,7 @@ export default function Home() {
             <h2 className='text-2xl font-semibold mb-4 text-[#f6851c]'>MetaMask successfully connected!</h2>
             <p className="text-xl mb-4 text-gray-600">Your Wallet Address is: <span className='font-semibold'>{walletAddress}</span></p>
             <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees ⛽️ because they manipulate data on the blockchain.</p>
-            <p className='text-lg text-gray-600 w-full text-center'>
+            <p className='text-lg text-gray-600 w-full text-center mb-2'>
               SepoliaETH is used for testing contracts to simulate using real-world dapps. To use any of the <span className='text-[#C97538] font-semibold'>orange</span> functions you&apos;ll need some. Head to{' '} 
               <a 
                 className='font-semibold hover:underline hover:cursor-pointer' 
@@ -249,6 +250,7 @@ export default function Home() {
               </a> 
               {' '}and enter in your wallet address to recieve some for free.
             </p>
+            <p className='text-sm text-gray-600 w-full text-center'>Make sure your metamask account is connected to the Sepolia network: Open MetaMask, In the top left dropdown select Sepolia network, Refresh the app</p>
           </div>
 
           {/* contract functions section */}
@@ -361,11 +363,11 @@ export default function Home() {
 
           </div>
 
-            <div className='flex flex-col items-center mt-auto mb-3 text-gray-600'>
+            <div className='flex flex-col items-center mt-10 mb-3 text-gray-600'>
               <p>View the deployed contract & transaction history on{' '}
                 <a
                   className='font-semibold hover:underline hover:cursor-pointer'
-                  href="https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2"
+                  href="https://sepolia.etherscan.io/address/0x16993AB19598182767e9a8cb8F78fF696F976Fd5"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
