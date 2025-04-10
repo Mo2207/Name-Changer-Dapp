@@ -4,45 +4,74 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import BlueButton from '@/components/blueButton';
+import OrangeButton from '@/components/orangeButton';
 import metamaskFox from '../../public/img/metamask-fox.png'; // import metamask logo
+import type { MetaMaskInpageProvider } from '@metamask/providers'; // import MetaMaskInpageProvider type
+
+
+// address of the deployed "NameDapp.sol" smart contract
+const CONTRACT_ADDRESS = "0x8bACb12b875aeb285ff76fa06f6F045F57ab8a88";
+
+// contract ABI (application binary interface)
+// tells the frontend how to interact with the smart contract
+const CONTRACT_ABI = [
+  {
+    "inputs": [],
+    "name": "getAllNames",
+    "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_index", "type": "uint256" }],
+    "name": "getName",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "_name", "type": "string" }],
+    "name": "addName",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_index", "type": "uint256" }],
+    "name": "removeName",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+// getMetaMaskProvider function
+const getMetaMaskProvider = (): MetaMaskInpageProvider => {
+  const ethereum = (window as typeof window & { ethereum?: MetaMaskInpageProvider }).ethereum;
+
+  if (!ethereum) {
+    alert("Please install MetaMask!");
+    throw new Error("MetaMask not found");
+  }
+
+  return ethereum;
+};
+
+// get READ provider function
+const readProvider = () => {
+  const provider = new ethers.BrowserProvider(getMetaMaskProvider());
+  return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+};
+
+// get READ & WRITE provider function
+const writeProvider = async () => {
+  const provider = new ethers.BrowserProvider(getMetaMaskProvider());
+  const signer = await provider.getSigner();
+  return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+}
 
 export default function Home() {
-
-  // address of the deployed "NameDapp.sol" smart contract
-  const CONTRACT_ADDRESS = "0x8bACb12b875aeb285ff76fa06f6F045F57ab8a88";
-
-  // contract ABI (application binary interface)
-  // tells the frontend how to interact with the smart contract
-  const CONTRACT_ABI = [
-    {
-      "inputs": [],
-      "name": "getAllNames",
-      "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "uint256", "name": "_index", "type": "uint256" }],
-      "name": "getName",
-      "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "string", "name": "_name", "type": "string" }],
-      "name": "addName",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "uint256", "name": "_index", "type": "uint256" }],
-      "name": "removeName",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ];
 
   // STATE VARIABLES
   const [walletAddress, setWalletAddress] = useState<string | null>(null); // needed to store the users wallet address
@@ -63,33 +92,21 @@ export default function Home() {
   // LOADING STATES
   const [addLoading, setAddLoading] = useState(false); // needed to show loading state for addName()
   const [removeLoading, setRemoveLoading] = useState(false); // needed to show loading state removeName()
-  
+
 
   // ASK USER PERMISSION TO CONNECT THEIR WALLET
   const connectWallet = async () => {
-    // get the metamask provider
-    const metaMaskProvider = (window as any).ethereum;
-    if (!metaMaskProvider) return alert("Please install MetaMask!");
-
-    // if metamask is installed, grab the users wallet address
-    const [address] = await metaMaskProvider.request({ method: 'eth_requestAccounts' }); // https://tinyurl.com/52stu9pw
-    setWalletAddress(address); // store the address in state
-  }
+    const metaMaskProvider = getMetaMaskProvider();
+    const accounts = await metaMaskProvider.request({ method: 'eth_requestAccounts' }) as string[];
+    const address = accounts[0];
+    setWalletAddress(address);
+  };
 
   // GET NAMES FROM SMART CONTRACT
   const getNamesOnContract = async () => { 
-    // get the metamask provider
-    const metaMaskProvider = (window as any).ethereum;
-    if (!metaMaskProvider) return alert("Please install MetaMask!");
-
-    // create READ-ONLY connection using metamask extension
-    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
-
-    // create a javascript representation of the smart contract
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider); // https://tinyurl.com/yc7erycv
-
     // call the getAllNames function from the smart contract and return result
     try {
+      const contract = readProvider(); // create a READ-ONLY connection using metamask extension
       const allNames = await contract.getAllNames(); // getAllNames() is a function from the smart contract
       setNames(allNames); // set the names in state
       console.log("Names on contract:", allNames); // log the names
@@ -101,18 +118,9 @@ export default function Home() {
 
   // GET NAME FROM SMART CONTRACT
   const getNameOnContract = async () => { 
-    // get the metamask provider
-    const metaMaskProvider = (window as any).ethereum;
-    if (!metaMaskProvider) return alert("Please install MetaMask!");
-
-    // create READ-ONLY connection using metamask extension
-    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
-
-    // create a javascript representation of the smart contract
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider); // https://tinyurl.com/yc7erycv
-
     // call the getName function from the smart contract and return result
     try {
+      const contract = readProvider(); // create a READ-ONLY connection using metamask extension
       const name = await contract.getName(getNameIndex); // getName() is a function from the smart contract
       setName(name); // set the names in state
       console.log("Name on contract:", name); // log the names
@@ -124,25 +132,12 @@ export default function Home() {
 
   // ADD NAME TO SMART CONTRACT
   const addNameOnContract = async () => {
-    // get the metamask provider
-    const metaMaskProvider = (window as any).ethereum;
-    if (!metaMaskProvider) return alert("Please install MetaMask!");
-
-    // create a READ & WRITE connection using metamask extension
-    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
-
-    // because addNameOnContract is a state changing function, we need to sign the transaction
-    // create a signer to sign transactions
-    const signer = await provider.getSigner(); // https://tinyurl.com/ynfffak8 getSigner() is a method of BrowserProvider
-
-    // create a javascript representation of the smart contract
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); // https://tinyurl.com/yc7erycv
-
     //  attempt to change the name on the smart contract
     try {
       // start loading
       setAddLoading(true);
 
+      const contract = await writeProvider(); // create a READ & WRITE connection using metamask extension
       const tx = await contract.addName(newName); // addName() is a function from the smart contract
       
       // wait for the transaction to be mined
@@ -155,7 +150,7 @@ export default function Home() {
       setAddNamesVisible(true);
       setTimeout(() => {
         setAddNamesVisible(false);
-      }, 3000);
+      }, 6000);
 
     } catch (error) {
       console.error("Transaction failed:", error); // log the error
@@ -168,25 +163,12 @@ export default function Home() {
 
   // REMOVE NAME FROM SMART CONTRACT
   const removeNameOnContract = async () => {
-    // get the metamask provider
-    const metaMaskProvider = (window as any).ethereum;
-    if (!metaMaskProvider) return alert("Please install MetaMask!");
-
-    // create a READ & WRITE connection using metamask extension
-    const provider = new ethers.BrowserProvider(metaMaskProvider); // https://tinyurl.com/ynfffak8
-
-    // because removeNameOnContract is a state changing function, we need to sign the transaction
-    // create a signer to sign transactions
-    const signer = await provider.getSigner(); // https://tinyurl.com/ynfffak8 getSigner() is a method of BrowserProvider
-
-    // create a javascript representation of the smart contract
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); // https://tinyurl.com/yc7erycv
-
     //  attempt to change the name on the smart contract
     try {
       // start loading
       setRemoveLoading(true);
 
+      const contract = await writeProvider(); // create a READ & WRITE connection using metamask extension
       const tx = await contract.removeName(removeNameIndex); // removeName() is a function from the smart contract
 
       // wait for the transaction to be mined
@@ -198,7 +180,7 @@ export default function Home() {
       setRemoveNamesVisible(true);
       setTimeout(() => {
         setRemoveNamesVisible(false);
-      }, 3000);
+      }, 6000);
 
     } catch (error) {
       console.error("Transaction failed:", error); // log the error
@@ -213,7 +195,7 @@ export default function Home() {
     <section className="flex flex-col items-center h-screen bg-gray-100 min-h-screen justify-center">
 
       {/* title */}
-      <div className='flex flex-col items-center'>
+      <div className='flex flex-col items-center mt-6'>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Name Changer Dapp</h1>
       </div>
 
@@ -235,12 +217,11 @@ export default function Home() {
               </p>
           </div>
           {/* metamask connection button */}
-          <button
+          <BlueButton
             onClick={connectWallet}
-            className="bg-[#224ead] text-white px-4 py-2 rounded hover:bg-[#224eadde] transition duration-300 ease-in-out"
           >
             Connect to MetaMask
-          </button>
+          </BlueButton>
         </>
       ) : (
         <>
@@ -254,7 +235,7 @@ export default function Home() {
             />
             <h2 className='text-2xl font-semibold mb-4 text-[#f6851c]'>MetaMask successfully connected!</h2>
             <p className="text-xl mb-4 text-gray-600">Your Wallet Address is: <span className='font-semibold'>{walletAddress}</span></p>
-            <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees because they manipulate data on the blockchain.</p>
+            <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees ⛽️ because they manipulate data on the blockchain.</p>
             <p className='text-lg text-gray-600 w-full text-center'>
               SepoliaETH is used for testing contracts to simulate using real-world dapps. To use any of the <span className='text-[#C97538] font-semibold'>orange</span> functions you'll need some. Head to{' '} 
               <a 
@@ -274,15 +255,14 @@ export default function Home() {
 
             {/* get names button */}
             <div className='flex flex-row mb-3 w-full'>
-              <button
-                onClickCapture={() => {
+              <BlueButton
+                onClick={() => {
                   setGetNamesVisible(true);
                   getNamesOnContract();
                 }}
-                className="bg-[#224ead] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#224eadde] transition duration-300 ease-in-out"
               >
                 Get All Names
-              </button>
+              </BlueButton>
 
               <div 
                 className={`text-gray-600 items-center text-xl ${getNamesVisible ? 'flex' : 'hidden'}`}
@@ -293,15 +273,14 @@ export default function Home() {
 
             {/* get name button */}
             <div className='flex flex-row mb-3 w-full'>
-              <button
-                onClickCapture={() => {
+              <BlueButton
+                onClick={() => {
                   setGetNameVisible(true);
                   getNameOnContract();
                 }}
-                className="bg-[#224ead] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#224eadde] transition duration-300 ease-in-out"
               >
                 Get Name
-              </button>
+              </BlueButton>
               <input 
                   type="number"
                   min="0"
@@ -322,15 +301,14 @@ export default function Home() {
             {/* add name button */}
             <div className='flex flex-row mb-3 w-full'>
               <div className='flex flex-row'>
-                <button
-                  onClickCapture={() => {
+                <OrangeButton
+                  onClick={() => {
                     if (!newName) return alert("Please enter a name!");
                     addNameOnContract();
                   }}
-                  className="bg-[#C97538] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#c97438d7] transition duration-300 ease-in-out"
                 >
                   Add Name
-                </button>
+                </OrangeButton>
                 <input 
                   type="text"
                   value={newName}
@@ -344,7 +322,7 @@ export default function Home() {
                 className='text-gray-600 items-center text-xl pl-3 flex'>
                 {addLoading && <p className='animate-pulse'>Waiting for confirmation...</p>}
                 {!addLoading && addNamesVisible && (
-                  <p>Name added to array!</p>
+                  <p>Name added to array! Run Get All Names again to see the updated array!</p>
                 )}
               </div>
             </div>
@@ -352,15 +330,14 @@ export default function Home() {
             {/* remove name button */}
             <div className='flex flex-row w-full'>
               <div className='flex flex-row'>
-                <button
-                  onClickCapture={() => {
+                <OrangeButton
+                  onClick={() => {
                     if (!removeNameIndex) return alert("Please enter an index!");
                     removeNameOnContract();
                   }}
-                  className="bg-[#C97538] text-white px-4 py-2 rounded w-[150px] mr-3 hover:bg-[#c97438d7] transition duration-300 ease-in-out"
                 >
                   Remove Name
-                </button>
+                </OrangeButton>
                 <input 
                   type="number"
                   min="0"
@@ -376,14 +353,14 @@ export default function Home() {
                 className='text-gray-600 items-center text-xl pl-3 flex'>
                 {removeLoading && <p className='animate-pulse'>Waiting for confirmation...</p>}
                 {!removeLoading && removeNamesVisible && (
-                  <p>Name removed from array!</p>
+                  <p>Name removed from array! Run Get All Names again to see the updated array!</p>
                 )}
               </div>
             </div>
 
           </div>
 
-            <div className='flex flex-col items-center mt-8 text-gray-600'>
+            <div className='flex flex-col items-center mt-auto mb-3 text-gray-600'>
               <p>View the deployed contract & transaction history on{' '}
                 <a
                   className='font-semibold hover:underline hover:cursor-pointer'
