@@ -11,7 +11,8 @@ import type { MetaMaskInpageProvider } from '@metamask/providers'; // import Met
 
 
 // address of the deployed "NameDapp.sol" smart contract
-const CONTRACT_ADDRESS = "0x8bACb12b875aeb285ff76fa06f6F045F57ab8a88";
+const CONTRACT_ADDRESS = "0x16993AB19598182767e9a8cb8F78fF696F976Fd5";
+
 
 // contract ABI (application binary interface)
 // tells the frontend how to interact with the smart contract
