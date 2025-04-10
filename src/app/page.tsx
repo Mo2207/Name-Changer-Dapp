@@ -1,7 +1,7 @@
 
 "use client" // needed to interact with window
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import metamaskFox from '../../public/img/metamask-fox.png'; // import metamask logo

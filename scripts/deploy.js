@@ -1,18 +1,18 @@
 
-async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contract with account:", deployer.address);
+// async function main() {
+//   const [deployer] = await ethers.getSigners();
+//   console.log("Deploying contract with account:", deployer.address);
 
-  const MyContract = await ethers.getContractFactory("MyContract");
-  const myContract = await MyContract.deploy();
+//   const MyContract = await ethers.getContractFactory("MyContract");
+//   const myContract = await MyContract.deploy();
 
-  await myContract.waitForDeployment();
+//   await myContract.waitForDeployment();
 
-  console.log("MyContract deployed to:", myContract.target);
-}
+//   console.log("MyContract deployed to:", myContract.target);
+// }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// main().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
