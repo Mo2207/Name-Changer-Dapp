@@ -237,14 +237,14 @@ export default function Home() {
             <p className="text-xl mb-4 text-gray-600">Your Wallet Address is: <span className='font-semibold'>{walletAddress}</span></p>
             <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees ⛽️ because they manipulate data on the blockchain.</p>
             <p className='text-lg text-gray-600 w-full text-center'>
-              SepoliaETH is used for testing contracts to simulate using real-world dapps. To use any of the <span className='text-[#C97538] font-semibold'>orange</span> functions you'll need some. Head to{' '} 
+              SepoliaETH is used for testing contracts to simulate using real-world dapps. To use any of the <span className='text-[#C97538] font-semibold'>orange</span> functions you&apos;ll need some. Head to{' '} 
               <a 
                 className='font-semibold hover:underline hover:cursor-pointer' 
                 href="https://www.alchemy.com/faucets/ethereum-sepolia"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Alchemy's Sepolia Faucet
+                Alchemy&apos;s Sepolia Faucet
               </a> 
               {' '}and enter in your wallet address to recieve some for free.
             </p>
