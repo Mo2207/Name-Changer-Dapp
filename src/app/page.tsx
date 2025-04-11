@@ -97,7 +97,7 @@ export default function Home() {
 
   // CHECK IF USER IS ON MOBILE
   useEffect(() => {
-    const checkSize = () => setIsMobile(window.innerWidth < 640); 
+    const checkSize = () => setIsMobile(window.innerWidth < 1024); 
     checkSize();
 
     window.addEventListener('resize', checkSize);
@@ -209,7 +209,7 @@ export default function Home() {
         <>
           <div className='flex flex-col items-center w-[50%] text-center'>
             <p className="text-lg mb-2 text-gray-600">
-              This Dapp is not optimized for mobile devices and requires the MetaMask browser extension to function.
+              This Dapp is not optimized for smaller screens or mobile devices and requires the MetaMask browser extension to function.
             </p>
             <p className="text-lg text-gray-600">
               Please use a desktop browser for the best experience.
