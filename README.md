@@ -1,6 +1,13 @@
 
 # 🪪 Name Changer DApp
 
+[![Vercel](https://img.shields.io/badge/Live%20on-Vercel-000?style=flat&logo=vercel)](https://name-dapp-two.vercel.app/)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)
+![Solidity](https://img.shields.io/badge/Solidity-363636?style=flat-square&logo=solidity)
+![Ethers.js](https://img.shields.io/badge/Ethers.js-6e45f2?style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?style=flat-square&logo=typescript&logoColor=white)
+
 This is a simple full-stack decentralized application (DApp) that allows users to interact with a smart contract on the **Ethereum Sepolia Testnet**. Users can:
 
 - Add names to a contract-managed array

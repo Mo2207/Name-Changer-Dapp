@@ -1,7 +1,7 @@
 
 "use client" // needed to interact with window
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import BlueButton from '@/components/blueButton';
@@ -79,7 +79,6 @@ export default function Home() {
   const [names, setNames] = useState<string[]>([]); // needed to store the names for getAllNames() function
   const [name, setName] = useState<string>(''); // needed to store the name for getName() function
   const [newName, setNewName] = useState(''); // needed to store the new name from the input field
-  const [rotation, setRotation] = useState(0); // needed to rotate the metamask logo
 
   // INDEX STATES
   const [removeNameIndex, setRemoveNameIndex] = useState<string>(''); // needed to store the index of the name to be removed
