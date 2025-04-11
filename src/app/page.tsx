@@ -1,7 +1,7 @@
 
 "use client" // needed to interact with window
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import BlueButton from '@/components/blueButton';
@@ -79,6 +79,7 @@ export default function Home() {
   const [names, setNames] = useState<string[]>([]); // needed to store the names for getAllNames() function
   const [name, setName] = useState<string>(''); // needed to store the name for getName() function
   const [newName, setNewName] = useState(''); // needed to store the new name from the input field
+  const [rotation, setRotation] = useState(0); // needed to rotate the metamask logo
 
   // INDEX STATES
   const [removeNameIndex, setRemoveNameIndex] = useState<string>(''); // needed to store the index of the name to be removed
@@ -193,10 +194,10 @@ export default function Home() {
   }
 
   return (
-    <section className="flex flex-col items-center h-screen bg-gray-100 justify-center min-h-screen px-4 py-8 overflow-y-auto">
+    <section className="flex flex-col items-center bg-gradient-to-t from-gray-100 to-blue-100 justify-center min-h-screen overflow-y-auto pt-6 pb-4">
 
       {/* title */}
-      <div className='flex flex-col items-center mt-[10rem]'>
+      <div className='flex flex-col items-center'>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Name Changer Dapp</h1>
       </div>
 
@@ -227,14 +228,16 @@ export default function Home() {
         </>
       ) : (
         <>
-          <div className="flex flex-col text-center items-center mt-4 mb-8 w-[75%]">
-            <Image
-              src={metamaskFox}
-              alt="MetaMask Logo"
-              width={75}
-              height={75}
-              className=""
-            />
+          <div className="flex flex-col text-center items-center mt-4 mb-8 w-[85%]">
+            <a href="https://metamask.io/en-GB/download">
+              <Image
+                src={metamaskFox}
+                alt="MetaMask Logo"
+                width={75}
+                height={75}
+                className="hover:scale-110 hover:cursor-pointer transition duration-300 ease-in-out"
+              />
+            </a>
             <h2 className='text-2xl font-semibold mb-4 text-[#f6851c]'>MetaMask successfully connected!</h2>
             <p className="text-xl mb-4 text-gray-600">Your Wallet Address is: <span className='font-semibold'>{walletAddress}</span></p>
             <p className='text-lg text-gray-600 w-full text-center mb-2'>This contract is deployed on Sepolia test network. The <span className='text-[#224ead] font-semibold'>blue</span> functions are free for anyone to use, however the <span className='text-[#C97538] font-semibold'>orange</span> functions require gas fees ⛽️ because they manipulate data on the blockchain.</p>
@@ -363,7 +366,7 @@ export default function Home() {
 
           </div>
 
-            <div className='flex flex-col items-center mt-10 mb-3 text-gray-600'>
+            <div className='flex flex-col items-center mt-4 text-gray-600'>
               <p>View the deployed contract & transaction history on{' '}
                 <a
                   className='font-semibold hover:underline hover:cursor-pointer'

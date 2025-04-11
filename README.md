@@ -15,7 +15,7 @@ The application itself is very simplistic — the cool part is the fact that all
 
 - **Contract Address:** [`0x8BA28EdA2878A861a9523699947773BD594280a2`](https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2)
 - **Network:** Sepolia Testnet  
-- **Block Explorer:** [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2)
+- **Block Explorer:** [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x16993AB19598182767e9a8cb8F78fF696F976Fd5)
 
 ---
 
@@ -36,7 +36,6 @@ The application itself is very simplistic — the cool part is the fact that all
 - 📋 Display all names in real-time (Finished ✅)
 - 🔎 Get a name at a specific index (Finished ✅)
 - 🔄 Live on-chain state updates (Finished ✅)
-- 🌐 Fully responsive UI using Tailwind CSS (WIP 🚧)
 
 ---
 
