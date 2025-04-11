@@ -1,5 +1,5 @@
 
-# 🪪 Name Changer DApp
+# 🪪 NameDapp
 
 [![Vercel](https://img.shields.io/badge/Live%20on-Vercel-000?style=flat&logo=vercel)](https://name-dapp-two.vercel.app/)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js)
