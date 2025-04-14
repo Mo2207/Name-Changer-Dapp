@@ -18,6 +18,8 @@ This is a simple full-stack decentralized application (DApp) that allows users t
 
 The application itself is very simplistic — the cool part is the fact that all data and interactions are stored and processed directly on the Sepolia blockchain. This means there's no traditional backend; all changes to the data (adding, removing, or reading names) are executed through smart contract functions and recorded immutably on-chain.
 
+---
+
 ## 🔗 Live Contract
 
 - **Contract Address:** [`0x8BA28EdA2878A861a9523699947773BD594280a2`](https://sepolia.etherscan.io/address/0x8BA28EdA2878A861a9523699947773BD594280a2)
@@ -43,6 +45,14 @@ The application itself is very simplistic — the cool part is the fact that all
 - 📋 Display all names in real-time (Finished ✅)
 - 🔎 Get a name at a specific index (Finished ✅)
 - 🔄 Live on-chain state updates (Finished ✅)
+
+---
+
+## 🔮 Future Goals
+
+- 📱 **Mobile Optimization** – Improve the app's layout and interactivity for smaller screens to make it fully responsive and mobile-friendly.
+- 🧠 **Extended Smart Contract Features** – Add new contract functions such as updating names, tracking ownership, or logging timestamps.
+- 🛠️ **UI/UX Enhancements** – Polish animations, form validation, and feedback indicators for a smoother user experience.
 
 ---
 
