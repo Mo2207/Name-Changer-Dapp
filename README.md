@@ -39,12 +39,12 @@ The application itself is very simplistic — the cool part is the fact that all
 
 ## ✨ Features
 
-- 🔐 Connect MetaMask wallet (Finished ✅)
-- ➕ Add names to a blockchain array (Finished ✅)
-- ➖ Remove names by index (Finished ✅)
-- 📋 Display all names in real-time (Finished ✅)
-- 🔎 Get a name at a specific index (Finished ✅)
-- 🔄 Live on-chain state updates (Finished ✅)
+- 🔐 Connect MetaMask wallet
+- ➕ Add names to a blockchain array
+- ➖ Remove names by index
+- 📋 Display all names in real-time
+- 🔎 Get a name at a specific index
+- 🔄 Live on-chain state updates
 
 ---
 
